@@ -1,0 +1,36 @@
+@RestResource(urlMapping='/Contact/customapi')
+global with sharing class UpdateContacts {
+  	@HttpPost
+    global static String doPost(List<ContactRequest> requestContactList) {
+        List<Contact> contactToUpdate = new List<Contact>();
+        try {
+            for (ContactRequest contactReq: requestContactList) {
+            	Contact contact = contactReq.validateRequest();
+                contact.FirstName = contactReq.firstName;
+                contact.LastName = contactReq.lastName;
+                contact.Title = contactReq.title;
+                contactToUpdate.add(contact);
+        	}
+            return 'success';
+        } catch(Exception e) {
+            return 'Error: ' + e.getMessage();
+        }
+    }
+
+    global class ContactRequest {
+        public String id;
+        public String firstName;
+        public String lastName;
+        public String title;
+    
+        public Contact validateRequest() {
+            Contact c = [SELECT Id FROM Contact WHERE Id =:id];
+            if (c == null) {
+                throw new CustomException('Invalid contact!');
+            }
+            return c;
+        }
+    }
+    
+    public class CustomException extends Exception { }
+}

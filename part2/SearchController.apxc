@@ -1,0 +1,42 @@
+public class SearchController {
+	public String searchString {get;set;}
+    public List<ResultObject> results {get;set;}
+        
+    
+    public void search() {
+        results = new List<ResultObject>();
+        if (String.isBlank(searchString)) {
+            return;
+        }
+        String queryString = searchString + '%';
+        List<Account> accounts = [SELECT Id,Name 
+                             FROM Account WHERE Name LIKE :queryString];
+        List<Contact> contacts = [SELECT Id,FirstName,LastName 
+                             FROM Contact WHERE FirstName LIKE :queryString];
+        for (Account account: accounts) {
+            results.add(new ResultObject(account));
+        }
+        for (Contact contact: contacts) {
+            results.add(new ResultObject(contact));
+        }
+        
+    }
+    
+    public class ResultObject {
+        public Id id { get; set; }
+        public String name { get; set; }
+        public String resultType { get; set; }
+        
+        public ResultObject(Account account) {
+            this.id = account.Id;
+            this.name = account.Name;
+            this.resultType = 'Account';
+        }
+        public ResultObject(Contact contact) {
+            this.id = contact.Id;
+            this.name = contact.FirstName + ' ' + contact.LastName;
+            this.resultType = 'Contact';
+        }
+        
+    }
+}

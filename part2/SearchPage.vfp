@@ -1,0 +1,15 @@
+<apex:page controller="SearchController">
+    <apex:form >
+        <apex:pageBlock title="Search">
+            <apex:inputText value="{!searchString}" label="Input"/>
+            <apex:commandButton value="Search" action="{!search}"/>
+            <apex:pageBlockTable value="{!results}" var="res">
+                <apex:column headerValue="Name" value="{!res.name}"/>
+                <apex:column headerValue="Type" value="{!res.resultType}"/>
+                <apex:column headerValue="Click to open">
+                	<apex:outputLink value="/{!res.Id}" target="_blank">View</apex:outputLink>
+                </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

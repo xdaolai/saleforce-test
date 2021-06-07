@@ -1,0 +1,36 @@
+<apex:page controller="SearchPageRemoter">
+    <script type="text/javascript">
+    function increaseCounter(id, resultType) {
+ 
+        Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.SearchPageRemoter.increaseCounter}',
+            id, resultType,
+            function(result, event){
+                    console.log({result, event});
+                if (event.status) {
+                    document.getElementById('counter_'+id).innerHTML = result;
+                }
+            }, 
+            {escape: true}
+        );
+    }
+    </script>
+    <apex:form >
+        <apex:pageBlock title="Search">
+            <apex:inputText value="{!searchString}" label="Input"/>
+            <apex:commandButton value="Search" action="{!search}"/>
+            <apex:pageBlockTable value="{!results}" var="res">
+                <apex:column headerValue="Name" value="{!res.name}"/>
+                <apex:column headerValue="Type" value="{!res.resultType}"/>
+                <apex:column headerValue="Counter">
+                    <div id="counter_{!res.id}">
+                        {!res.counter}
+                    </div>
+                </apex:column>
+                <apex:column headerValue="Click to update counter">
+                    <apex:commandLink onclick="increaseCounter('{!res.id}', '{!res.resultType}')" value="Increment Counter" id="cmdLink"/>
+                </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

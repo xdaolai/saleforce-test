@@ -1,0 +1,27 @@
+trigger AprroveContact on Contact (after insert, after update) {
+    List<Account> accountsToUpdate = new List<Account>();
+    for(Integer i=0; i<Trigger.New.size(); i++) {
+        Contact contact = Trigger.New[i];
+        Account a;
+        Account b;
+        if (Trigger.isInsert) {
+            ProcessApproveRequest.submitForApproval(contact);
+            ProcessApproveRequest.approveRecord(contact);
+            a = ProcessContact.increaseTotalContact(contact.AccountId);
+        }
+        if (Trigger.isUpdate) {
+            if (contact.AccountId != Trigger.Old[i].AccountId) {
+                a = ProcessContact.decreaseTotalContact(Trigger.Old[i].AccountId);
+                b = ProcessContact.increaseTotalContact(contact.AccountId);
+            }
+        }
+        if (a != null) {
+            accountsToUpdate.add(a);
+        }
+        if (b != null) {
+            accountsToUpdate.add(b);
+        }
+    }
+    
+    update accountsToUpdate;
+}

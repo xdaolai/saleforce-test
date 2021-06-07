@@ -1,0 +1,71 @@
+global with sharing class SearchPageRemoter {
+	public String searchString {get;set;}
+    public List<ResultObject> results {get;set;}
+    private Map<String, Integer> resultsIndexMap;
+    public SearchPageRemoter() { }
+    
+    @RemoteAction
+    global static Decimal increaseCounter(String id, String resultType) {
+        Decimal counter = 0;
+        if (resultType == 'Account') {
+            Account a = [SELECT Id,Counter__c
+                             FROM Account WHERE Id =:id];
+            counter = a.Counter__c + 1;
+            a.Counter__c = counter;
+            update a;
+        }
+        if (resultType == 'Contact') {
+            Contact c = [SELECT Id,Counter__c
+                             FROM Contact WHERE Id =:id];
+            counter = c.Counter__c + 1;
+            c.Counter__c = counter;
+            update c;
+        }
+        return counter;
+    }
+    
+    public void search() {
+        results = new List<ResultObject>();
+        resultsIndexMap = new Map<String,Integer>();
+        Integer index = 0;
+        if (String.isBlank(searchString)) {
+            return;
+        }
+        String queryString = searchString + '%';
+        List<Account> accounts = [SELECT Id,Name,Counter__c
+                             FROM Account WHERE Name LIKE :queryString];
+        List<Contact> contacts = [SELECT Id,FirstName,LastName,Counter__c
+                             FROM Contact WHERE FirstName LIKE :queryString];
+        for (Account account: accounts) {
+            results.add(new ResultObject(account));
+            resultsIndexMap.put(account.Id, index);
+            index++;
+        }
+        for (Contact contact: contacts) {
+            results.add(new ResultObject(contact));
+            resultsIndexMap.put(contact.Id, index);
+            index++;
+        }
+        
+    }
+    
+    public class ResultObject {
+        public Id id { get; set; }
+        public String name { get; set; }
+        public String resultType { get; set; }
+        public Decimal counter { get; set; }
+        
+        public ResultObject(Account account) {
+            this.id = account.Id;
+            this.name = account.Name;
+            this.resultType = 'Account';
+            this.counter = account.Counter__c;
+        }
+        public ResultObject(Contact contact) {
+            this.id = contact.Id;
+            this.name = contact.FirstName + ' ' + contact.LastName;
+            this.resultType = 'Contact';
+            this.counter = contact.Counter__c;
+        }
+    }
+}

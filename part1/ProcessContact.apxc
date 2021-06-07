@@ -1,0 +1,30 @@
+public class ProcessContact {
+    private static Account getAccountById(Id accountId) {
+        if (accountId == null) {
+            return null;
+        }
+        Account[] accounts = [SELECT Id,TotalContacts__c 
+                             FROM Account WHERE Id=:accountId];
+        if (accounts.size() == 0) {
+            return null;
+        }
+        return accounts[0];
+    }
+    
+    public static Account increaseTotalContact(Id accountId) {
+        Account account = getAccountById(accountId);
+        if (account == null) {
+            return null;
+        }
+        account.TotalContacts__c = account.TotalContacts__c + 1;
+        return account;
+    }
+    public static Account decreaseTotalContact(Id accountId) {
+        Account account = getAccountById(accountId);
+        if (account == null) {
+            return null;
+        }
+        account.TotalContacts__c = account.TotalContacts__c - 1;
+        return account;
+    }
+}
